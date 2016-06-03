@@ -33,6 +33,9 @@ class Slack:
 	def open_im(self, user):
 		return self.query('im.open', {'user':user})
 
+	def rtm_start(self):
+		return self.query('rtm.start')
+
 	def post(self, channel, text):
 		return self.query('chat.postMessage', {'channel':channel, 'text':text})
 
