@@ -1,0 +1,5 @@
+{
+	"title": {"source":"text", "xpath": "teiHeader/fileDesc/titleStmt/title[@type='main']"},
+	"author": {"source":"text", "xpath": "teiHeader/fileDesc/sourceDesc/title[@type='main']"}
+
+}
