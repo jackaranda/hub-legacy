@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<strong>Pages list</strong>
+<p>
+{% for page in items %}
+<p>
+	<div class='small-4 columns'><strong>{{ page['title'] }}</strong></div>
+	<div class='small-8 columns editable'>{{ page['content'] }}</div>
+</p>
+{% endfor %}
+</p>
+{% endblock %}
+

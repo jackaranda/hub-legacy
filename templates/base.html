@@ -1,0 +1,36 @@
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/css/foundation.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+   
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i" rel="stylesheet"> 
+
+    <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+
+
+  </head>
+  <body>
+
+    <div class="row hub-content">
+      <div>
+      {% block content %}
+        {{ content }}
+      {% endblock %}
+      </div>
+    </div>
+
+    <script src="/static/js/vendor/jquery.js"></script>
+    <script src="/static/js/vendor/what-input.js"></script>
+    <script src="/static/js/vendor/foundation.js"></script>
+    <script src="/static/js/app.js"></script>
+
+    {% block script %}
+    {% endblock %}
+
+  </body>
+</html>

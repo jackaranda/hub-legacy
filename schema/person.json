@@ -1,0 +1,40 @@
+{
+	"name": "Person",
+	"description": "A person (alive, dead, undead, or fictional)",
+	"properties": {
+		"name":{
+			"type":"StringField",
+			"description":"first name",
+			"options": {"required":true}
+		},
+		"age":{
+			"type": "IntegerField",
+			"options": {"minimum":0,"maximum":120}
+		},
+		"url":{
+			"type": "URLField",
+			"description":"URL of resource describing or referencing person"
+		},
+		"image":{
+			"type":"URLField",
+			"description":"A URL link to an image of the person"
+		},
+		"familyName":{
+			"type":"StringField",
+			"description":"Surname or family name"
+		},
+		"additionalName":{
+			"type":["StringField"],
+			"description":"Other names"
+		},
+		"email":{
+			"type":"EmailField",
+			"description":"primary email address"
+		},
+		"additionalEmail":{
+			"type":["EmailField"],
+			"description":"other, non-primary email addresses"
+		}
+	}
+}
+

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class='editable' id='title'>{{ title }}</h2>
+<hr/>
+<div class='editable' id='content'>{{ content }}</div>
+{% endblock %}
+
+{% block script %}
+    <script>
+      $(function() {
+
+        $('.editable').each(function(index, item) {
+
+          selector = '#' + item.id;
+
+          console.log('attaching editor to ' + selector);
+
+          editor = tinymce.init({ 
+            
+            selector: selector,
+            inline: true,
+            valid_elements: '',
+
+
+            setup: function(editor) {
+
+              console.log('creating editor');
+              editor.on('blur', function(e) {
+
+                data = {};
+                $('.editable').each(function(index, item) {
+                  data[item.id] = tinymce.get(item.id).getContent();
+                });
+
+                console.log(data)
+
+                  $.ajax({
+                    method: "PUT",
+                    url: $(location).attr('href'),
+                    data: data
+                  
+                  }).done(function(msg) {
+                    console.log(msg);
+                  });
+                  
+                  console.log('done for now');
+              });
+
+              editor.on('focus', function(e) {
+                console.log('here we go');
+              });
+
+            }
+          });
+        });
+      });
+    </script>
+
+{% endblock %}
+

@@ -1,0 +1,49 @@
+{
+	"name": "Article",
+	"description": "A text article consisting of sections and sub-sections",
+	"properties": {
+		"title":{
+			"type":"StringField",
+			"description":"Article Title",
+			"required":true,
+			"alias":"name"
+		},
+		"authors":{
+			"type": ["Person"],
+			"reference": true,
+			"description":"List of authors, first order should be first in the list"
+		},
+		"titleImage":{
+			"type":"URLField",
+			"description":"A URL link to an a title image"
+		},
+		"sections":{
+			"description":"The sections of the article",
+			"type":[{
+				"name":"ArticleSection",
+				"description":"An section of an Article",
+				"properties": {
+					"heading":{
+						"type":"StringField",
+						"required":false,
+						"alias":"name"
+					},
+					"level":{
+						"type":"IntegerField",
+						"required":true,
+						"default":0
+					},
+					"content":{
+						"type":"StringField",
+						"description":"The text content of the section"
+					},
+					"markup":{
+						"type":"StringField",
+						"description":"The markup language used in the section"
+					}
+				}
+			}]
+		}
+	}
+}
+

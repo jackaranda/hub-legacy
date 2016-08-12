@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<strong>Paths list</strong>
+<p>
+{% for path in items %}
+{{ path['path'] }} ({{ path['type'] }}) using template {{ path['template'] }}<br/>
+{% endfor %}
+</p>
+{% endblock %}
+
