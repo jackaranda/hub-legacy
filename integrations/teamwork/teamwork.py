@@ -12,7 +12,7 @@ class Teamwork:
 
 	def query(self, method, objectid=None, extra_params=None):
 
-		print method, objectid, extra_params
+		print(method, objectid, extra_params)
 
 		if objectid:
 			objectid = str(objectid)
@@ -26,7 +26,7 @@ class Teamwork:
 			for key,value in extra_params.items():
 				params[key] = value
 
-		print url, params
+		print(url, params)
 		r = requests.get(url, params=params, auth=HTTPBasicAuth(self.token, 'xyz'))
 		
 		return r.json()

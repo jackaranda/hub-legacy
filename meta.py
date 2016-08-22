@@ -22,7 +22,7 @@ class Property(object):
 	"""
 	pass
 
-	def __init__(self):
+	def __init__(self, required=False):
 		self.default = None
 
 	def add_to_model(self, model, name):
@@ -92,6 +92,64 @@ class BoundedIntegerProperty(IntegerProperty):
 			return True, ""
 
 
+class URLProperty(Property):
+
+	def __init__(self):
+		self.default = None
+
+	def validate(self, value):
+	
+		valid, error = super(URLProperty, self).validate(value)
+
+		if not valid:
+			return False, error
+
+		try:
+			parts = urlparse(self.value)
+		except:
+			return False, "Error parsing string {} as a URL".format(value)
+		else:
+			if not (parts[0] and parts[1]):
+				return False, "Error parsing string {} as a URL".format(value)
+
+		return True, ""
+
+
+class EmailProperty(Property):
+
+	def __init__(self):
+		self.default = None
+
+	def validate(self, value):
+
+		valid, error = super(EmailProperty, self).validate(value)
+
+		try:
+			self.value.index('@')
+		except:
+			return False, "'{}' is not a valid email address".format(self.value)
+
+		return True, ""
+
+
+class RefProperty(Property):
+
+	def __init__(self, othermodel, id_property="_id"):
+		self.othermodel = othermodel
+		self.id_property = id_property
+
+	def validate(self, value):
+		pass
+
+
+class RefListProperty(Property):
+
+	def __init__(self, othermodel, id_property="_id", maxlength=None):
+		self.othermodel = othermodel
+		self.id_property = id_property
+		self.maxlength = maxlength
+
+
 class ModelProperties(object):
 
 	def __init__(self):
@@ -104,27 +162,42 @@ class ModelProperties(object):
 class ModelMeta(type):
 
 	def __new__(cls, clsname, bases, namespace):
-		#print(cls, clsname, bases, namespace)
+#		print(cls, clsname, bases, namespace)
 
 		newnamespace = OrderedDict(_meta=ModelProperties())
 		newnamespace['_storage'] = None
+		newnamespace['_schema'] = None
 
 		for name, thing in namespace.items():
 			
 			if name == '_storage':
 				newnamespace['_storage'] = thing
 
+			if name == '_schema':
+				newnamespace['_schema'] = thing
+
 			elif isinstance(thing, Property):
-				#print("Adding {} called {} to _meta properties".format(type(thing), name))
+				print("Adding {} called {} to _meta properties".format(type(thing), name))
 				newnamespace[name] = thing.default
 				newnamespace['_meta'].add_property(name, thing)
+
+				if isinstance(thing, RefProperty):
+					id_name = name + "_id"
+					newnamespace[id_name] = None
 
 			else:
 				newnamespace[name] = thing
 
+		return super(ModelMeta, cls).__new__(cls, clsname, bases, newnamespace)
 
-		result = super(ModelMeta, cls).__new__(cls, clsname, bases, newnamespace)
-		return result
+
+	def __init__(self, name, bases, namespace):
+		print("this gets called here")
+
+		print(self._schema)
+		if self._schema:
+			print("here")
+			self._schema.add_model(self)
 
 
 class MongoStorage(object):
@@ -150,6 +223,18 @@ class MongoStorage(object):
 		return list(collection.find(query))
 
 
+class Schema(object):
+
+	def __init__(self):
+		self.models = OrderedDict()
+
+	def add_model(self, model):
+		print(isinstance(model, Model))
+		if isinstance(model, Model):
+			self.models[model.__name__] = Model
+
+
+
 class Model(metaclass=ModelMeta):
 
 	def __init__(self, **kwargs):
@@ -164,6 +249,9 @@ class Model(metaclass=ModelMeta):
 	def __setattr__(self, name, value):
 
 		if name in self._meta.properties:
+
+			if isinstance(self._meta.properties[name], RefProperty):
+				pass
 
 			valid, error = self._meta.properties[name].validate(value)
 			
@@ -197,15 +285,18 @@ class Model(metaclass=ModelMeta):
 	def as_json(self):
 		return json.dumps(self.as_dict())
 
+
 	@classmethod
 	def add_storage(cls, storage):
 		cls._storage = storage
 		storage.add_to_model(cls)
 		return cls
 
+
 	def save(self):
 		print('save', self._storage, self.as_json())
 		self._storage.insert(self.as_dict())
+
 
 	@classmethod
 	def find(cls, query):
@@ -214,18 +305,31 @@ class Model(metaclass=ModelMeta):
 
 
 	@classmethod
-	def make(cls, name, properties, storage=None):
+	def make(cls, name, properties, schema=None, storage=None):
+
+		properties['_schema'] = schema
+
 		return type(name, (Model,), properties)
+
 
 
 if __name__ == "__main__":
 
-	props = OrderedDict([('name',StringProperty(default='CJ')), ('age',BoundedIntegerProperty(0,120))])
-	MyModel = Model.make('MyModel', props).add_storage(MongoStorage('meta'))
+	schema = Schema()
 
-	p1 = MyModel(name='Jack', age=39)
-	p2 = MyModel(name='Chris', age=42)
-	p3 = AnotherModel(age=19)
+	props = OrderedDict([('name',StringProperty(default='CJ')), ('age',BoundedIntegerProperty(0,120))])
+
+#	with open('schema/person.json') as f:
+#		Person = Model.make('Person', **json.loads(f.read())).add_storage(MongoStorage('meta'))
+
+	Person = Model.make('Person', props, schema=schema).add_storage(MongoStorage('meta'))
+
+	p1 = Person(name='Jack', age=39)
+	p2 = Person(name='Chris', age=42)
+	p3 = Person(age=19)
+
+	print(Person._schema)
+	print(Person._schema.models)
 
 	print(p1.name, p2.name, p3.name)
 	print(p1.age, p2.age, p3.age)
@@ -235,8 +339,8 @@ if __name__ == "__main__":
 
 	print(p1.as_json())
 
-	p1.save()
-	p2.save()
-	p3.save()
+#	p1.save()
+#	p2.save()
+#	p3.save()
 
-	print(MyModel.find({'name':'Chris'}))
+	print(Person.find({'name':'Chris'}))
